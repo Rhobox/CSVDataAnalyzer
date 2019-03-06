@@ -16,7 +16,7 @@ class OptionsWindow(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(OptionsWindow, self).__init__(parent=parent)
-        self.header_line = 1
+        self.header_line = 0
 
     def connect_signals(self):
         self.pushButton.clicked.connect(self.confirm_options)
@@ -55,9 +55,12 @@ class OptionsWindow(QtWidgets.QWidget):
 
     def confirm_options(self):
         try:
-            self.header_line = int(self.header_line_edit.text())
-        except ValueError as e:
-            self.header_line = 1
+            if str(self.header_line_edit.text()).lower() == "none":
+                self.header_line = -1
+            else:
+                self.header_line = int(self.header_line_edit.text())
+        except ValueError:
+            self.header_line = 0
             print("It all burns")
         self.return_options.emit(self.header_line)
         self.hide()
