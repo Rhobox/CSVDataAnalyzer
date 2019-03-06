@@ -10,9 +10,9 @@ def fileOpenFunctionality():
     return open_file_names
 
 
-def open_csv_file(file_name):
+def open_csv_file(file_name, header_line):
     try:
-        return pd.read_csv(file_name)
+        return pd.read_csv(file_name, header=header_line)
     except UnicodeDecodeError:
-        return pd.read_csv(file_name, encoding='CP1252')
+        return pd.read_csv(file_name, encoding='CP1252', header=header_line)
 
