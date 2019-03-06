@@ -19,7 +19,7 @@ class UiMainWindow(object):
 
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.graphicsView = PlotWidget(self.centralwidget)
-        self.fileLocationLineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.reset_data_button = QtWidgets.QPushButton(self.centralwidget)
         self.fileSelectButton = QtWidgets.QPushButton(self.centralwidget)
         self.fileList = QtWidgets.QListWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -38,6 +38,7 @@ class UiMainWindow(object):
         self.open_file = None
         self.header_line = 0
         self.options_dialog = None
+        self.clearing_signal = False
 
         self.options = ow.OptionsWindow()
         self.options.setupUi(self.options)
@@ -47,6 +48,7 @@ class UiMainWindow(object):
         self.actionClose.triggered.connect(self.close)
         self.actionOptions.triggered.connect(self.open_options_dialog)
         self.fileSelectButton.clicked.connect(self.file_open)
+        self.reset_data_button.clicked.connect(self.clear_list)
         self.fileList.currentItemChanged.connect(self.file_list_item_activated)
         self.fileHeaderXAxis.currentItemChanged.connect(self.file_x_header_changed)
         self.fileHeaderYAxis.currentItemChanged.connect(self.file_y_header_changed)
@@ -60,8 +62,8 @@ class UiMainWindow(object):
         self.graphicsView.setGeometry(QtCore.QRect(355, 10, 431, 431))
         self.graphicsView.setObjectName("graphicsView")
 
-        self.fileLocationLineEdit.setGeometry(QtCore.QRect(100, 10, 241, 20))
-        self.fileLocationLineEdit.setObjectName("fileLocationLineEdit")
+        self.reset_data_button.setGeometry(QtCore.QRect(100, 10, 81, 23))
+        self.reset_data_button.setObjectName("fileLocationLineEdit")
 
         self.fileSelectButton.setGeometry(QtCore.QRect(10, 10, 81, 23))
         self.fileSelectButton.setObjectName("fileSelectButton")
@@ -103,6 +105,7 @@ class UiMainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "CSV Data Analyzer"))
         self.fileSelectButton.setText(_translate("MainWindow", "Open Files..."))
+        self.reset_data_button.setText(_translate("MainWindow", "Clear List"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionClose.setText(_translate("MainWindow", "Close..."))
@@ -122,6 +125,15 @@ class UiMainWindow(object):
     def close():
         QtCore.QCoreApplication.instance().quit()
 
+    def clear_list(self):
+        self.graphicsView.plotItem.clear()
+        self.plotData = {}
+        self.currentFile = None
+        self.clearing_signal = True
+        self.fileList.clear()
+        self.fileHeaderXAxis.clear()
+        self.fileHeaderYAxis.clear()
+
     def file_open(self):
         file_name_list = uip.fileOpenFunctionality()[0]
         self.add_file_names_to_file_list(file_name_list)
@@ -137,12 +149,15 @@ class UiMainWindow(object):
         return True
 
     def file_list_item_activated(self):
-        current_file_name = self.fileList.currentItem().text()
-        self.add_missing_plot_data_dict_item(current_file_name)
-        self.currentFile = self.plotData[current_file_name]
-        self.currentFile.initialize_plot_data()
-        self.populate_header_list_boxes()
-        self.plot_data()
+        if not self.clearing_signal:
+            current_file_name = self.fileList.currentItem().text()
+            self.add_missing_plot_data_dict_item(current_file_name)
+            self.currentFile = self.plotData[current_file_name]
+            self.currentFile.initialize_plot_data()
+            self.populate_header_list_boxes()
+            self.plot_data()
+        else:
+            self.clearing_signal = False
 
     def add_missing_plot_data_dict_item(self, current_file_name):
         if current_file_name not in self.plotData.keys():
