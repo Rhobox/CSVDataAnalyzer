@@ -10,9 +10,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
 import UIProcesses as uip
 import CSVPlotData as csvp
-import pandas as pd
+import HeaderLineBox as hlb
 
-class Ui_MainWindow(object):
+class UiMainWindow(object):
 	def __init__(self):
 		super().__init__()
 
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
 		self.menuOptions = QtWidgets.QMenu(self.menubar)
 		self.statusbar = QtWidgets.QStatusBar(MainWindow)
 		self.actionClose = QtWidgets.QAction(MainWindow)
-		self.actionThese_dont_exist_yet = QtWidgets.QAction(MainWindow)
+		self.actionOptions = QtWidgets.QAction(MainWindow)
 		self.fileHeaderXAxis = QtWidgets.QListWidget(self.centralwidget)
 		self.fileHeaderYAxis = QtWidgets.QListWidget(self.centralwidget)
 
@@ -35,8 +35,12 @@ class Ui_MainWindow(object):
 		self.x_axis = None
 		self.y_axis = None
 		self.open_file = None
+		self.header_line = None
+		self.options_dialog = None
 
 	def connectSignals(self):
+		self.actionClose.triggered.connect(self.close)
+		self.actionOptions.triggered.connect(self.open_options_dialog)
 		self.fileSelectButton.clicked.connect(self.file_open)
 		self.fileList.currentItemChanged.connect(self.file_list_item_activated)
 		self.fileHeaderXAxis.currentItemChanged.connect(self.file_x_header_changed)
@@ -80,9 +84,9 @@ class Ui_MainWindow(object):
 
 		self.actionClose.setObjectName("actionClose")
 
-		self.actionThese_dont_exist_yet.setObjectName("actionThese_dont_exist_yet")
+		self.actionOptions.setObjectName("actionThese_dont_exist_yet")
 		self.menuFile.addAction(self.actionClose)
-		self.menuOptions.addAction(self.actionThese_dont_exist_yet)
+		self.menuOptions.addAction(self.actionOptions)
 		self.menubar.addAction(self.menuFile.menuAction())
 		self.menubar.addAction(self.menuOptions.menuAction())
 
@@ -97,7 +101,18 @@ class Ui_MainWindow(object):
 		self.menuFile.setTitle(_translate("MainWindow", "File"))
 		self.menuOptions.setTitle(_translate("MainWindow", "Options"))
 		self.actionClose.setText(_translate("MainWindow", "Close..."))
-		self.actionThese_dont_exist_yet.setText(_translate("MainWindow", "These don\'t exist yet..."))
+		self.actionOptions.setText(_translate("MainWindow", "Options..."))
+
+	def open_options_dialog(self):
+		self.options_dialog = hlb.Ui_Form(self)
+		self.options_dialog.show()
+
+	def update_options(self, header_line):
+		self.header_line = header_line
+		print(self.header_line)
+
+	def close(self):
+		QtCore.QCoreApplication.instance().quit()
 
 	def file_open(self):
 		file_name_list = uip.fileOpenFunctionality()[0]
@@ -145,11 +160,12 @@ class Ui_MainWindow(object):
 		self.graphicsView.plotItem.clear()
 		self.graphicsView.plotItem.plot(self.currentFile.x_data, self.currentFile.y_data)
 
+
 if __name__ == "__main__":
 	import sys
 	app = QtWidgets.QApplication(sys.argv)
 	MainWindow = QtWidgets.QMainWindow()
-	ui = Ui_MainWindow()
+	ui = UiMainWindow()
 	ui.setupUi(MainWindow)
 	MainWindow.show()
 	sys.exit(app.exec_())

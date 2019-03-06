@@ -14,12 +14,10 @@ class PlotData:
         self.headers = ["Index"] + headers
 
     def parse_headers(self, headers):
-        allowable_types = ['float64', 'float32' 'int']
+        allowable_types = ['float', 'int']
         for header in headers:
-            for col_type in allowable_types:
-                if str(col_type) not in str(type(self.data[header][0])):
-                    headers.remove(header)
-                    break
+            if len([i for i in allowable_types if i in str(type(self.data[header][0]))]) < 1:
+                headers.remove(header)
         return headers
 
     def initialize_plot_data(self):
