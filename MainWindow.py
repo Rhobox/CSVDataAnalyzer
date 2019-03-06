@@ -10,7 +10,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
 import UIProcesses as uip
 import CSVPlotData as csvp
-import HeaderLineBox as hlb
+import OptionsWidget as ow
+
 
 class UiMainWindow(object):
 	def __init__(self):
@@ -37,6 +38,10 @@ class UiMainWindow(object):
 		self.open_file = None
 		self.header_line = None
 		self.options_dialog = None
+
+		self.options = ow.OptionsWindow()
+		self.options.setupUi(self.options)
+		self.options.return_options.connect(self.update_options)
 
 	def connectSignals(self):
 		self.actionClose.triggered.connect(self.close)
@@ -104,14 +109,15 @@ class UiMainWindow(object):
 		self.actionOptions.setText(_translate("MainWindow", "Options..."))
 
 	def open_options_dialog(self):
-		self.options_dialog = hlb.Ui_Form(self)
-		self.options_dialog.show()
+		self.options.populate_options()
+		self.options.show()
 
 	def update_options(self, header_line):
 		self.header_line = header_line
 		print(self.header_line)
 
-	def close(self):
+	@staticmethod
+	def close():
 		QtCore.QCoreApplication.instance().quit()
 
 	def file_open(self):

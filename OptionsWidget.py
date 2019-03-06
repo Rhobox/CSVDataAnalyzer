@@ -9,10 +9,14 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import MainWindow as mw
 
-class Ui_Dialog(object):
+
+class OptionsWindow(QtWidgets.QWidget):
+
+    return_options = QtCore.pyqtSignal(int)
+
     def __init__(self, parent=None):
-        QtWidgets.QWidget.__init__(self, parent)
-        self.header_line = None
+        super(OptionsWindow, self).__init__(parent=parent)
+        self.header_line = 1
 
     def connect_signals(self):
         self.pushButton.clicked.connect(self.confirm_options)
@@ -46,7 +50,16 @@ class Ui_Dialog(object):
         self.label.setText(_translate("Dialog", "Header Line:"))
         self.pushButton.setText(_translate("Dialog", "Confirm"))
 
+    def populate_options(self):
+        self.header_line_edit.setText(str(self.header_line))
+
     def confirm_options(self):
-        mw.ui.update_options(int(self.header_line_edit.text()))
-        print("We did it!")
-        QtCore.QCoreApplication.instance().quit()
+        try:
+            self.header_line = int(self.header_line_edit.text())
+        except ValueError as e:
+            self.header_line = 1
+            print("It all burns")
+        self.return_options.emit(self.header_line)
+        self.hide()
+
+

@@ -1,46 +1,68 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Code example from:
+https://www.reddit.com/r/learnpython/comments/7w9pt9/pyqt5_passing_variable_from_one_window_to_another/dtzxjhb
+"""
 
-# Form implementation generated from reading ui file 'HeaderLineOptions.ui'
-#
-# Created by: PyQt5 UI code generator 5.9.2
-#
-# WARNING! All changes made in this file will be lost!
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-
-
-class Ui_Form(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super(Ui_Form, self).__init__(parent)
-
-    def setupUi(self, Form):
-        Form.setObjectName("Form")
-        Form.resize(171, 83)
-        self.pushButton = QtWidgets.QPushButton(Form)
-        self.pushButton.setGeometry(QtCore.QRect(50, 50, 75, 23))
-        self.pushButton.setObjectName("pushButton")
-        self.header_line_label = QtWidgets.QLabel(Form)
-        self.header_line_label.setGeometry(QtCore.QRect(10, 0, 61, 16))
-        self.header_line_label.setObjectName("header_line_label")
-        self.lineEdit = QtWidgets.QLineEdit(Form)
-        self.lineEdit.setGeometry(QtCore.QRect(10, 20, 113, 20))
-        self.lineEdit.setObjectName("lineEdit")
-
-        self.retranslateUi(Form)
-        QtCore.QMetaObject.connectSlotsByName(Form)
-
-    def retranslateUi(self, Form):
-        _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
-        self.pushButton.setText(_translate("Form", "Confirm"))
-        self.header_line_label.setText(_translate("Form", "Header Line:"))
+import sys
+from PyQt5 import QtWidgets, QtCore
 
 
-if __name__ == "__main__":
-    import sys
+class LoginWindow(QtWidgets.QWidget):
+
+    got_password = QtCore.pyqtSignal(str)
+
+    def __init__(self):
+        super(LoginWindow, self).__init__()
+
+        self.password = QtWidgets.QLineEdit()
+        self.password.setEchoMode(QtWidgets.QLineEdit.Password)
+        send_button = QtWidgets.QPushButton("Send")
+        close_button = QtWidgets.QPushButton("Close")
+
+        send_button.clicked.connect(self.send_clicked)
+        close_button.clicked.connect(self.close)
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.addWidget(self.password)
+        layout.addWidget(send_button)
+        layout.addWidget(close_button)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Login")
+        self.setMinimumWidth(350)
+
+    def send_clicked(self):
+        self.got_password.emit(self.password.text())
+
+
+class MyWindow(QtWidgets.QWidget):
+
+    def __init__(self):
+        super(MyWindow, self).__init__()
+
+        self.login = LoginWindow()
+        self.login.got_password.connect(self.show_it)
+
+        self.edit = QtWidgets.QLineEdit()
+        button = QtWidgets.QPushButton("Get input from window")
+        button.clicked.connect(self.get_login)
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.edit)
+        layout.addWidget(button)
+        self.setLayout(layout)
+
+    def get_login(self):
+        self.login.show()
+
+    def show_it(self, the_password):
+        self.edit.setText(the_password)
+
+
+if __name__ == '__main__':
+
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    window = MyWindow()
+    window.show()
     sys.exit(app.exec_())
